@@ -1,6 +1,8 @@
 ﻿using CQRSMediaTr.Data;
+using CQRSMediaTr.Features.Employees.Command;
 using CQRSMediaTr.Model.Domain;
 using CQRSMediaTr.Model.DTO;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +13,16 @@ namespace CQRSMediaTr.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private CQRSMediaTrDbContext _context;
-        public EmployeesController(CQRSMediaTrDbContext context)
+        private readonly CQRSMediaTrDbContext _context;
+        private readonly IMediator _mediator;
+
+        public EmployeesController(CQRSMediaTrDbContext context,IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
         }
         [HttpGet]
-        public async Task<IActionResult>GetAllEmployeesAsync()
+        public async Task<IActionResult> GetAllEmployeesAsync()
         {
             var employees = await _context.Employees.ToListAsync();
             return Ok(employees);
@@ -48,34 +53,33 @@ namespace CQRSMediaTr.Controllers
             return Ok(employeeToBeDeleted);
         }
 
+        //[HttpPost()]
+        //public async Task<IActionResult> CreateEmployee([FromBody] Employee employee)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+        //    await _context.AddAsync(employee);
+        //    await _context.SaveChangesAsync();
+        //    return Ok(employee);
+        //}
         [HttpPost()]
-        public async Task<IActionResult> CreateEmployee([FromBody] Employee employee)
+        public async Task<IActionResult> CreateEmployee(Employee employee)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            await _context.AddAsync(employee);
-            await _context.SaveChangesAsync();
-            return Ok(employee);
+            var response =await  _mediator.Send(new CreateEmployeeCommand(employee));
+
+            return Ok(response);
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployee(int id, [FromBody] EmployeeUpdateDTO employeeUpdateDTO)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-            employee.Name = employeeUpdateDTO.Name;
-            employee.Address= employeeUpdateDTO.Address;
-            employee.PanDetails = employeeUpdateDTO.PanDetails;
-            await _context.SaveChangesAsync();
-            return NoContent();
+            var response = await _mediator.Send(new UpdateEmployeeCommand(id,employeeUpdateDTO));
+            return Ok(response);
 
         }
     }
