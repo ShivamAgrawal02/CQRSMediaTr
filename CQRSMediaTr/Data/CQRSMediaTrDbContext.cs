@@ -1,4 +1,4 @@
-﻿using CQRSMediaTr.Model;
+﻿using CQRSMediaTr.Model.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace CQRSMediaTr.Data

@@ -1,8 +1,7 @@
-﻿namespace CQRSMediaTr.Model
+﻿namespace CQRSMediaTr.Model.DTO
 {
-    public class Employee
+    public class EmployeeUpdateDTO
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
         public string PanDetails { get; set; }
