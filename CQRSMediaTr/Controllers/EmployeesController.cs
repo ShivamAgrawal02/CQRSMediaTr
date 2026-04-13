@@ -33,7 +33,7 @@ namespace CQRSMediaTr.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _mediator.Send(new GetEmployeeByIdQuery(id));
             if (employee == null) return NotFound();
             return Ok(employee);
         }
@@ -41,31 +41,22 @@ namespace CQRSMediaTr.Controllers
         [HttpGet("GetEmployeesByName")]
         public async Task<IActionResult> GetEmployeesByName([FromQuery] string name)
         {
-            var employees = await _context.Employees.Where(x => x.Name == name).ToListAsync();
+            var employees = await _mediator.Send(new GetEmployeesByNameQuery(name));
+            if ((employees == null))
+            {
+                return NotFound();
+            }
             return Ok(employees);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var employeeToBeDeleted = await _context.Employees.FindAsync(id);
-            if (employeeToBeDeleted == null) return NotFound();
-            _context.Employees.Remove(employeeToBeDeleted);
-            await _context.SaveChangesAsync();
-            return Ok(employeeToBeDeleted);
+            var IsDeleted = await _mediator.Send(new DeleteEmployeeCommand(id));
+            if (IsDeleted == false) return NotFound();
+            return Ok(IsDeleted);
         }
 
-        //[HttpPost()]
-        //public async Task<IActionResult> CreateEmployee([FromBody] Employee employee)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-        //    await _context.AddAsync(employee);
-        //    await _context.SaveChangesAsync();
-        //    return Ok(employee);
-        //}
         [HttpPost()]
         public async Task<IActionResult> CreateEmployee(Employee employee)
         {
