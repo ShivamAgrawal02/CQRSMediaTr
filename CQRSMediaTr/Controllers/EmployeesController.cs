@@ -1,5 +1,6 @@
 ﻿using CQRSMediaTr.Data;
 using CQRSMediaTr.Features.Employees.Command;
+using CQRSMediaTr.Features.Employees.Query;
 using CQRSMediaTr.Model.Domain;
 using CQRSMediaTr.Model.DTO;
 using MediatR;
@@ -24,7 +25,8 @@ namespace CQRSMediaTr.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllEmployeesAsync()
         {
-            var employees = await _context.Employees.ToListAsync();
+            //var employees = await _context.Employees.ToListAsync();
+            var employees = await _mediator.Send(new GetAllEmployeesQuery());
             return Ok(employees);
         }
 
